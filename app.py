@@ -3,14 +3,10 @@ import google.generativeai as genai
 import sqlite3
 import pandas as pd
 
-# --- PAGE SETUP ---
 st.set_page_config(page_title="First AId", page_icon="🩺", layout="wide")
-
-# --- DATABASE SETUP (THE RADAR) ---
 def init_db():
     conn = sqlite3.connect('outbreak_radar.db')
     c = conn.cursor()
-    # Create a table that only stores the symptom, location, and automatic timestamp
     c.execute('''
         CREATE TABLE IF NOT EXISTS anonymous_reports (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -21,18 +17,15 @@ def init_db():
     ''')
     conn.commit()
     conn.close()
-
 def log_anonymous_case(symptom, location):
-    if location: # Only log if they provided a location
+    if location: 
         conn = sqlite3.connect('outbreak_radar.db')
         c = conn.cursor()
         c.execute('INSERT INTO anonymous_reports (symptom_category, location) VALUES (?, ?)', (symptom, location))
         conn.commit()
         conn.close()
-
 def get_outbreak_alerts():
     conn = sqlite3.connect('outbreak_radar.db')
-    # Count how many times a symptom appears in a specific location
     query = """
         SELECT symptom_category as Symptom, location as ZipCode, COUNT(*) as CaseCount 
         FROM anonymous_reports 
@@ -43,11 +36,7 @@ def get_outbreak_alerts():
     df = pd.read_sql_query(query, conn)
     conn.close()
     return df
-
-# Run the database setup immediately
 init_db()
-
-# --- SECURE API SETUP ---
 if "GEMINI_API_KEY" not in st.secrets:
     st.error("Missing GEMINI_API_KEY. Please add it to your secrets.toml file.")
     st.stop()
@@ -63,14 +52,14 @@ Disclaimer: I am an AI, not a doctor.
 """
 model = genai.GenerativeModel('gemini-2.5-flash', system_instruction=system_instructions)
 
-# --- SIDEBAR (NAVIGATION, RADAR & MAPS) ---
+
 with st.sidebar:
     st.title("First AId 🩺")
     st.caption("AI-powered triage & outbreak radar.")
     
     st.write("---")
     st.write("### 📍 Your Location")
-    # We moved the location input to the top so the Radar can use it!
+   
     user_location = st.text_input("Enter Zip Code or City:")
     
     if user_location:
@@ -90,7 +79,7 @@ with st.sidebar:
         st.warning("⚠️ **Evelated Case Clusters Detected:**")
         st.dataframe(alerts_df, hide_index=True, use_container_width=True)
 
-# --- MAIN CHAT INTERFACE ---
+
 st.title("Symptom Checker")
 st.info("🔒 **Privacy Guarantee:** We do not store your personal data. Only an anonymized symptom category and zip code are sent to the Outbreak Radar.")
 
@@ -102,8 +91,6 @@ for message in st.session_state.chat_session.history:
     avatar_icon = "🩺" if role == "assistant" else "👤"
     with st.chat_message(role, avatar=avatar_icon):
         st.write(message.parts[0].text)
-
-# Chat Input
 user_input = st.chat_input("Describe your symptoms...")
 
 if user_input:
@@ -115,9 +102,9 @@ if user_input:
             response = st.session_state.chat_session.send_message(user_input)
             st.write(response.text)
             
-            # THE MAGIC HAPPENS HERE: Secretly log a simplified tag to the database
+        
             if user_location:
-                # We log a simple keyword based on their input to group them easily
+        
                 if "fever" in user_input.lower():
                     log_anonymous_case("Fever", user_location)
                 elif "cough" in user_input.lower():
