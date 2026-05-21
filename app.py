@@ -1,4 +1,8 @@
 import streamlit as st
+import google.generativeai as genai
+import sqlite3
+import pandas as pd
+st.set_page_config(page_title="First AId", page_icon="🩺", layout="wide")
 hide_streamlit_ui = """
             <style>
             /* Hides the top-right menu, deploy button, and GitHub icon */
@@ -8,17 +12,12 @@ hide_streamlit_ui = """
             /* Hides the bottom 'Made with Streamlit' footer */
             [data-testid="stFooter"] {display: none;}
             
-            /* Attempts to hide the Community Cloud floating badges */
+            /* Attempts to hide the community cloud floating badges */
             #viewerBadge {display: none;}
             .viewerBadge_container {display: none;}
             </style>
             """
 st.markdown(hide_streamlit_ui, unsafe_allow_html=True)
-import google.generativeai as genai
-import sqlite3
-import pandas as pd
-
-st.set_page_config(page_title="First AId", page_icon="🩺", layout="wide")
 def init_db():
     conn = sqlite3.connect('outbreak_radar.db')
     c = conn.cursor()
