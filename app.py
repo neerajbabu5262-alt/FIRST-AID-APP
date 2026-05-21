@@ -1,4 +1,19 @@
 import streamlit as st
+hide_streamlit_ui = """
+            <style>
+            /* Hides the top-right menu, deploy button, and GitHub icon */
+            [data-testid="stHeader"] {display: none;}
+            [data-testid="stToolbar"] {display: none;}
+            
+            /* Hides the bottom 'Made with Streamlit' footer */
+            [data-testid="stFooter"] {display: none;}
+            
+            /* Attempts to hide the Community Cloud floating badges */
+            #viewerBadge {display: none;}
+            .viewerBadge_container {display: none;}
+            </style>
+            """
+st.markdown(hide_streamlit_ui, unsafe_allow_html=True)
 import google.generativeai as genai
 import sqlite3
 import pandas as pd
